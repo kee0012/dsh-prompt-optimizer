@@ -19,25 +19,24 @@ DSH 提示词优化插件：在输入框底部工具栏（模型选择左侧）�
 
 ## 安装
 
-在 DSH 运行的终端中执行：
+插件托管在 GitHub（`kee0012/dsh-prompt-optimizer`，未发布到 npm），DSH 支持以 git 依赖方式直接安装：
 
 ```sh
-# 方式一：本地目录安装（开发迭代，改代码后重启 DSH 生效）
-dsh plugin --profile desktop add "D:\path\to\dsh-prompt-optimizer-release"
+# 方式一：从 GitHub 安装（推荐，日常使用；拉取默认分支最新提交）
+dsh plugin --profile web add github:kee0012/dsh-prompt-optimizer
 
-# 方式二：先打包再安装（适合分发）
-cd "D:\path\to\dsh-prompt-optimizer-release"
-pnpm pack
-dsh plugin --profile desktop add ./dsh-prompt-optimizer-0.2.0.tgz
+# 方式二：本地目录安装（开发调试，改代码后重启 DSH 生效）
+dsh plugin --profile web add "D:\path\to\dsh-prompt-optimizer-release"
 ```
 
-> 如果用的是 web profile，把 `--profile desktop` 换成 `--profile web`。
+> `--profile` 换成你实际使用的 profile（web / desktop）。
+> 如需固定某个版本，可在仓库后追加 `#<tag>`（例如 `github:kee0012/dsh-prompt-optimizer#v0.3.0`），发布时打 tag 即可。
 > 安装后需要重启 DSH 才会加载新的 client bundle。
 
 验证配置层是否生效：
 
 ```sh
-dsh --profile desktop --dump-config | grep -A2 dsh-prompt-optimizer
+dsh --profile web --dump-config | grep -A2 dsh-prompt-optimizer
 ```
 
 ## 使用
