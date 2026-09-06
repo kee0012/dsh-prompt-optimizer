@@ -24,9 +24,6 @@ DSH 提示词优化插件：在输入框底部工具栏（模型选择左侧）�
 ```sh
 # 方式一：从 GitHub 安装（推荐，日常使用；拉取默认分支最新提交）
 dsh plugin --profile web add github:kee0012/dsh-prompt-optimizer
-
-# 方式二：本地目录安装（开发调试，改代码后重启 DSH 生效）
-dsh plugin --profile web add "D:\path\to\dsh-prompt-optimizer-release"
 ```
 
 > `--profile` 换成你实际使用的 profile（web / desktop）。
