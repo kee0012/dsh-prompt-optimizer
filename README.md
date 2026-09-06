@@ -22,7 +22,7 @@ DSH 提示词优化插件：在输入框底部工具栏（模型选择左侧）�
 插件托管在 GitHub（`kee0012/dsh-prompt-optimizer`，未发布到 npm），DSH 支持以 git 依赖方式直接安装：
 
 ```sh
-# 方式一：从 GitHub 安装（推荐，日常使用；拉取默认分支最新提交）
+# 从 GitHub 安装（推荐，日常使用；拉取默认分支最新提交）
 dsh plugin --profile web add github:kee0012/dsh-prompt-optimizer
 ```
 
