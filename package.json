@@ -1,12 +1,30 @@
 {
   "name": "dsh-prompt-optimizer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "DSH 提示词优化插件：在输入框底部（模型选择左侧）一键调用当前选中的大模型优化草稿。",
   "type": "module",
-  "main": "./src/index.js",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "deepseek",
+    "deepseek-harness",
+    "plugin",
+    "prompt",
+    "prompt-engineering",
+    "optimizer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kee0012/dsh-prompt-optimizer.git"
+  },
+  "homepage": "https://github.com/kee0012/dsh-prompt-optimizer#readme",
+  "bugs": {
+    "url": "https://github.com/kee0012/dsh-prompt-optimizer/issues"
+  },
+  "main": "lib/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./client": "./client/client.js",
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
@@ -27,12 +45,17 @@
     }
   },
   "files": [
-    "client",
+    "lib",
     "src",
+    "client",
     "cordis.patch.yml",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "check": "node --check src/index.js && node --check client/client.js"
+    "build": "node scripts/build.mjs",
+    "bundle": "node scripts/build.mjs",
+    "gates": "node scripts/gates/run.mjs",
+    "check": "node scripts/build.mjs && node --check lib/index.js && node --check lib/client.js && node scripts/gates/run.mjs"
   }
 }
