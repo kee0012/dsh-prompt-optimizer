@@ -29,7 +29,6 @@ DSH 提示词优化插件：在输入框工具栏放一个 ✨ 按钮，用当�
 dsh plugin --profile desktop add github:kee0012/dsh-prompt-optimizer
 ```
 
-> `--profile` 换成你实际使用的 profile（`desktop` / `web`）。如需固定某个版本，可在仓库后追加 `#<tag>`（例如 `github:kee0012/dsh-prompt-optimizer#v0.3.0`）。
 > 安装后需要**重启 DSH**，新的服务端代码与 client bundle 才会生效。
 
 ## 使用
