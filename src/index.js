@@ -168,6 +168,48 @@ function errorPayload(error) {
   return { ok: false, error: { code: 'LLM_ERROR', message: String(error) } };
 }
 
+function errorCode(error) {
+  return typeof error === 'object' && error !== null && typeof error.code === 'string' ? error.code : '';
+}
+
+/**
+ * Reconcile a requested reasoning effort with the capabilities the selected
+ * model actually advertises.
+ *
+ * The harness validates an explicit effort strictly and rejects it rather than
+ * clamping it (see `resolveCallWithInfo` in dsh-llm: "no clamping or aliasing is
+ * performed"). The browser client forwards the effort saved on the session, and
+ * that value outlives a model switch: pick a custom route that publishes no
+ * reasoning metadata while the session still carries `reasoningEffort: "high"`,
+ * and every request dies with UNSUPPORTED_REASONING_EFFORT. Choosing a model
+ * must never disable the optimizer, so an effort the model cannot honor is
+ * dropped here — the model then runs on its own default.
+ *
+ * @param modelInfo - the harness's exact model metadata for this route.
+ * @param requested - the effort the caller asked for, if any.
+ * @returns the effort to send, or undefined to use the model's own default.
+ */
+function reconcileReasoningEffort(modelInfo, requested) {
+  if (typeof requested !== 'string' || requested === '') return undefined;
+  const efforts = modelInfo?.reasoning?.efforts;
+  if (!Array.isArray(efforts)) return undefined;
+  return efforts.some((effort) => effort?.id === requested) ? requested : undefined;
+}
+
+/**
+ * Ask the harness what the selected model supports before spending a call.
+ * A capability lookup that fails must not fail the request: fall back to no
+ * explicit effort, which every model accepts.
+ */
+async function acceptedReasoningEffort(ctx, provider, model, requested) {
+  if (typeof requested !== 'string' || requested === '') return undefined;
+  try {
+    return reconcileReasoningEffort(await ctx.llm.resolveModelInfo(provider, model), requested);
+  } catch {
+    return undefined;
+  }
+}
+
 function messageText(message) {
   const blocks = Array.isArray(message?.content) ? message.content : [];
   return blocks
@@ -255,17 +297,33 @@ export function apply(ctx) {
         source: { kind: 'plugin', plugin: name },
       }];
 
-      try {
+      const system = buildSystemPrompt(style, contextText);
+
+      /** One dispatch attempt; `effort` undefined means "let the model decide". */
+      const attempt = async (effort) => {
         const options = {
           provider,
           model,
           messages,
-          system: buildSystemPrompt(style, contextText),
+          system,
           temperature: OPTIMIZER_TEMPERATURE,
         };
-        if (reasoningEffort !== undefined) options.reasoningEffort = reasoningEffort;
-        const stream = ctx.llm.stream(options);
-        const optimized = await collectText(stream);
+        if (effort !== undefined) options.reasoningEffort = effort;
+        return collectText(ctx.llm.stream(options));
+      };
+
+      try {
+        const effort = await acceptedReasoningEffort(ctx, provider, model, reasoningEffort);
+        let optimized;
+        try {
+          optimized = await attempt(effort);
+        } catch (error) {
+          // Safety net for a capability lookup that could not see the truth (an
+          // adapter raced by HMR, or a route registered after the catalog load):
+          // retry once with no explicit effort instead of failing the feature.
+          if (effort === undefined || errorCode(error) !== 'UNSUPPORTED_REASONING_EFFORT') throw error;
+          optimized = await attempt(undefined);
+        }
         if (optimized === '') {
           throw new Error('the model returned an empty optimized prompt');
         }
